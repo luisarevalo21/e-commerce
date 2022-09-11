@@ -8,8 +8,6 @@ const accountsRouter = express.Router();
 //   res.render("signup");
 // });
 accountsRouter.post("/register", async (req, res, next) => {
-  //salt goes here
-
   //come back to prevent same email from being adde to database
   //https://github.com/Aminadav/passport-one-session-per-user
   //https://stackoverflow.com/questions/29144827/express-js-passport-js-how-to-restrict-multiple-login-by-the-same-user
@@ -43,9 +41,28 @@ accountsRouter.post("/register", async (req, res, next) => {
 accountsRouter.get("/:userId", (req, res) => {
   const { userId } = req.params;
 
-  console.log("hello from accoutns user id", userId);
-  res.render("accounts");
+  db.query(
+    `SELECT * FROM accounts WHERE id = '${userId}'`,
+    null,
+    (err, user) => {
+      if (err) return err;
+
+      if (user.rows.length === 0) {
+        res.send("No user found");
+      }
+
+      res.render("accounts", { data: user.rows[0] });
+      // res.status(201).send(user.rows[0]);
+    }
+  );
 });
+
+// accountsRouter.delete("/delete", (req, res) => {
+//   const currentUser = req.user.id;
+
+//   console.loog("got a delete request", req.user.id);
+
+// });
 
 // accountsRouter.post("/login", (req, res) => {});
 

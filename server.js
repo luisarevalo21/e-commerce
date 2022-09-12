@@ -15,6 +15,7 @@ const productsRouter = require("./routes/products.js");
 const accountsRouter = require("./routes/accounts.js");
 const authRouter = require("./routes/auth");
 const cartRouter = require("./routes/cart.js");
+const ordersRouter = require("./routes/orders");
 
 app.use(
   session({
@@ -80,6 +81,7 @@ app.use("/products", productsRouter);
 app.use("/accounts", accountsRouter);
 app.use("/login", authRouter);
 app.use("/cart", cartRouter);
+app.use("/orders", ordersRouter);
 
 app.set("view engine", "ejs");
 

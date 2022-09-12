@@ -15,4 +15,7 @@ ordersRouter.get("/:orderId", (req, res) => {
   );
 });
 
+ordersRouter.post("/", (req, res) => {
+  console.log("isnde post method");
+});
 module.exports = ordersRouter;

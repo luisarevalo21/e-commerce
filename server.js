@@ -5,7 +5,7 @@ const port = 3000;
 const db = require("./db/index");
 const session = require("express-session");
 const { comparePasswords } = require("./db/hashing");
-
+const swaggerJSDoc = require("swagger-jsdoc");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 

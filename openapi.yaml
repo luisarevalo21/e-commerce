@@ -1,0 +1,256 @@
+openapi: 3.0.1
+info:
+  title: E-commerce api
+  version: 1.0.0
+  description: small e-commerce api
+paths:
+  /orders:
+    summary: fetches all orders
+    description: gets all orders in db
+    get:
+      summary: gets all orders
+      description: fetches all orders from the database
+      operationId: get_orders
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                order data:
+                  value: '[{"id":2,"total":"5","account_id":25}]'
+          description: Response back        
+        default:
+          description: Default error sample response
+      tags:
+        - Orders
+  /orders/{accountId}:
+    summary: gets orders from account id
+    description: fetches all orders from the db using the accountId
+    get:
+      summary: fetches all orders from id
+      description: gets all orders from the db using the account id
+      operationId: orders_account_id
+      parameters:
+       - name: accountId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                order data:
+                  value: |-
+                    [
+                      {
+                        "id": 2,
+                        "total": "5",
+                        "account_id": 25
+                      }
+                    ]
+          description: Response back            
+        default:
+          description: Default error sample response
+      tags:
+        - Orders
+  /cart:
+    summary: fetches the cart from db
+    description: fetches the items from a user's cart
+    get:
+      summary: gets all items in the cart
+      description: fetches all items currently in the cart database
+      operationId: get_cart
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                cart data:
+                  value: >-
+                    [{"name":"M&M's","qty":1,"price":"2.00"},{"name":"Snickers
+                    Bars","qty":1,"price":"3.00"}]
+          description: Response back          
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+  /cart/{cartId}:
+    summary: gets the cart using cartid
+    description: fetches all items in the current cart using the cartId
+    get:
+      summary: gets all items in a specific cart
+      description: fetches all cart items from the specific cart using cart id
+      operationId: cart_cart_id
+      parameters:
+       - name: cartId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                cart data:
+                  value: >-
+                    [{"qty":1,"name":"M&M's","price":"2.00"},{"qty":1,"name":"Snickers
+                    Bars","price":"3.00"}]
+          description: Response back  
+        default:
+           description: Default error sample response
+      tags:
+        - Cart
+    delete:
+      summary: deletes a specific cart
+      description: deletes all items in a cart using the cart id
+      operationId: delete_cart_items
+      parameters:
+       - name: cartId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+  /cart/{cartId}/checkout:
+    summary: checks out the cart
+    description: posts all items in the cart using cart id into the orders table
+    post:
+      summary: creates a new order
+      description: 'posts to the orders table using the cart id '
+      operationId: cart_checkout
+      parameters:
+       - name: cartId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: string 
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+        
+  /products:
+    summary: gets all the products
+    description: fetches all the products store in the db
+    get:
+      summary: gets all products
+      description: fetches all products from the products table
+      operationId: get_products
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Products
+  /products/{productId}:
+    summary: gets all products using product id
+    description: fetches a single product using product id
+    get:
+      summary: gets all products using product id
+      description: fetches a single product using product id
+      operationId: get_product_id
+      parameters:
+       - name: productId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: string  
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Products
+  /accounts:
+    summary: gets all the accounts
+    description: fetches all the accounts in db
+    get:
+      summary: gets all accounts
+      description: fetches all the accounts in the db
+      operationId: get_accounts
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Accounts
+  /accounts/{userId}:
+    summary: gets specific account
+    description: fetches a single account using account id
+    get:
+      summary: gets a single account
+      description: fetches a single account using user id
+      operationId: get_account_id
+      parameters:
+       - name: userId
+         in: path
+         description: 'The id of the user.'
+         required: true
+         schema:
+          type: integer
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Accounts
+  /accounts/register:
+    summary: creates a new account
+    description: posts a new account into accounts table
+    post:
+      summary: creates a new account
+      description: 'posts new user account into database '
+      operationId: post_account
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Accounts
+  /login:
+    summary: logins in a user
+    description: fetches user data from db and checks if it matches the current user
+    post:
+      summary: logins an account
+      description: fetches data from db and compares to current user and logins user
+      operationId: login_user
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Login
+    get:
+      summary: fetches login file
+      description: once data is correct fetches the ui for login user
+      operationId: get_login
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Login
+  /logout:
+    summary: logs out a user
+    description: 'logs out the current user. '
+    post:
+      summary: logs out the user
+      description: posts and logouts the current user
+      operationId: post_logout
+      responses:
+        default:
+          description: Default error sample response
+      tags:
+        - Logout
+        
+        
+      
+        
+
+      

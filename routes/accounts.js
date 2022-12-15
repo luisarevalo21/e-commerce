@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db/index.js");
 const { passwordHash } = require("../db/hashing");
 const accountsRouter = express.Router();
+const jwt = require("jsonwebtoken");
 
 //,maybe move them later?
 // accountsRouter.get("/signup", (req, res) => {
@@ -17,19 +18,38 @@ accountsRouter.post("/register", async (req, res, next) => {
 
   const hashedPassword = await passwordHash(password, 5);
 
+  const token = jwt.sign(
+    {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60,
+      data: { email, hashedPassword },
+    },
+    "secet-key"
+  );
+  req.user.token = token;
+
   db.query(
     "SELECT email FROM accounts WHERE email = $1",
     [email],
     (err, result) => {
       if (result.rows.length === 0) {
         db.query(
-          "INSERT INTO accounts (email, password ) VALUES( $1, $2)",
+          "INSERT INTO accounts (email, password ) VALUES( $1, $2) RETURNING id",
           [email, hashedPassword],
           (err, result) => {
             if (err) {
               return err;
             }
-            res.sendStatus(200);
+
+            console.log("result", result);
+
+            // db.query(
+            //   "INSERT INTO cart (account_id) VALUES($1)",
+            //   [result.id],
+            //   (err, response) => {
+            //     if (err) return err;
+            //     res.sendStatus(201).json({ token, userId: result.id });
+            //   }
+            // );
           }
         );
       }
@@ -38,6 +58,7 @@ accountsRouter.post("/register", async (req, res, next) => {
       }
     }
   );
+
   // db.query(
   //   `INSERT INTO accounts (email, password) VALUES('${email}', '${hashedPassword}')`,
   //   null,

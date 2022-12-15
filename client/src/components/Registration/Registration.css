@@ -1,0 +1,75 @@
+.container {
+  color: #212529;
+  background: #ddd;
+  min-height: 80vh;
+  vertical-align: middle;
+  display: flex;
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.login {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+  width: 70%;
+  margin: auto;
+}
+
+.row {
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+  margin: 0;
+}
+
+.login-container {
+  background-color: #fff;
+  padding: 4vh 5vh;
+  border-bottom-left-radius: 1rem;
+  border-top-left-radius: 1rem;
+}
+
+.login button {
+  /* width: 50%; */
+  /* flex-wrap: wrap; */
+  margin: 0 auto;
+  border-radius: 3px;
+  border-style: none;
+  margin-bottom: 3%;
+  height: 30px;
+}
+.login button:hover {
+  cursor: pointer;
+}
+.el-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 3%;
+}
+.el-container label {
+  margin-bottom: 2px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.buttons button {
+  /* flex: 1; */
+  width: 40%;
+  height: 30px;
+}

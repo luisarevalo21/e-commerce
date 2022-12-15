@@ -1,128 +1,137 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const app = express();
-const port = 3000;
-const db = require("./db/index");
+const port = 8000;
 const session = require("express-session");
-const { comparePasswords } = require("./db/hashing");
-const swaggerJSDoc = require("swagger-jsdoc");
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
+require("./configs/GoogleConfig");
+// require("./configs/LocalConfig");
+const cors = require("cors");
 
-const bcrypt = require("bcrypt");
+const initializePassport = require("./passport-config");
+initializePassport(passport);
 
-const productsRouter = require("./routes/products.js");
-const accountsRouter = require("./routes/accounts.js");
-const authRouter = require("./routes/auth");
-const cartRouter = require("./routes/cart.js");
-const ordersRouter = require("./routes/orders");
+// const initializeGooglePassport = require("./configs/GoogleConfig");
+// initializeGooglePassport(passport);
+// passportLocalInitialize(passport);
 
+app.use(express.urlencoded({ extended: false }));
+
+// app.use(flash());
 app.use(
   session({
     secret: "secret-key",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 24 * 60 * 60,
+    },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => {
-  // console.log("USER IN SERALIZE", user);
-  done(null, user.id);
-});
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
-passport.deserializeUser((id, done) => {
-  db.query(`SELECT * FROM accounts WHERE id = ${id}`, function (err, user) {
-    if (err) return done(err);
+app.use(express.json());
 
-    // console.log("RESULT", user);
-    done(null, user.rows[0].id);
-  });
-});
-passport.use(
-  new LocalStrategy({ usernameField: "email" }, function (
-    username,
-    password,
-    done
-  ) {
-    db.query(
-      `SELECT * FROM accounts WHERE email = '${username}'`,
-      null,
-      async (err, user) => {
-        if (err) return err;
-        if (!user.rows[0]) {
-          return done(null, false);
-        }
+const productsRouter = require("./routes/products.js");
+const localRouter = require("./routes/LocalRouter");
+const cartRouter = require("./routes/cart.js");
+const ordersRouter = require("./routes/orders");
+const googleRouter = require("./routes/GoogleRouter");
+const categoriesRouter = require("./routes/CategoriesRouter");
 
-        const hashedPassword = user.rows[0].password;
-        const passwordsMatched = await comparePasswords(
-          password,
-          hashedPassword
-        );
-
-        if (passwordsMatched) {
-          return done(null, user.rows[0]);
-        }
-      }
-    );
-  })
-);
-
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
-
+// app.use("/auth", googleRouter);
+app.use("/accounts", localRouter);
+app.use("/categories", categoriesRouter);
 app.use("/products", productsRouter);
-app.use("/accounts", accountsRouter);
-app.use("/login", authRouter);
 app.use("/cart", cartRouter);
-app.use("/orders", ordersRouter);
+// app.use("/orders", ordersRouter);
 
-app.set("view engine", "ejs");
+// app.get("/dashboard", (req, res) => {
+//   // console.log("req,token", req.session.token);
+//   console.log("dashboard triggered");
+// });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+//local get
+
+app.get("/user-data", checkIsAuthenticated, (req, res) => {
+  res
+    .status(200)
+    .json({ loggedIn: true, user: req.user.email, id: req.user.id });
 });
 
-app.get("/signup", (req, res) => {
-  res.render("signup");
+app.get("/dashboard", checkIsAuthenticated, (req, res) => {
+  res
+    .status(200)
+    .json({ loggedIn: true, user: req.user.email, id: req.user.id });
+});
+app.get("/nouser", (req, res) => {
+  res.status(400).json({ loggedIn: false });
+});
+app.get("/login", (req, res) => {
+  // console.log("rreq", req.user);
+  // console.log("login triggered");
+  res.status(404).json({ message: "Error user not found" });
 });
 
 app.post(
   "/login",
   passport.authenticate("local", {
+    successRedirect: "/dashboard",
     failureRedirect: "/login",
-    failureMessage: true,
-  }),
-  (req, res) => {
-    console.log("USER ID", req.user.id);
-    res.redirect(`/accounts/${req.user.id}`);
-  }
+  })
 );
 
-app.get("/account", (req, res) => {
-  res.send("HELLPO FROM ACCOUNT");
-});
-app.post("/logout", (req, res) => {
+// app.post(
+//   "/auth/google",
+//   passport.authenticate(
+//     "google",
+//     { scope: ["email", "profile"] },
+//     (req, res) => {
+//       console.log("gogole login triggered");
+//     }
+//   )
+// );
+
+// app.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", { session: true }),
+//   (req, res) => {
+//     res.redirect("/dashboard/=");
+//   }
+// );
+// app.post(
+//   "/auth/google",
+//   passport.authenticate("google", {
+//     successRedirect: "/dashboard",
+//     failureRedirect: "/login",
+//   }),
+//   () => {
+//     console.log("google auth is called");
+//   }
+// );
+
+app.delete("/logout", (req, res) => {
+  // console.log("logout triggered");
+
   req.logout(function (err) {
     if (err) return next(err);
 
-    res.redirect("/login");
+    req.session = null;
+    res.sendStatus(200);
+    // res.redirect("/login");
   });
 });
 
-// app.get("/products", (req, res) => {
-//   db.query("SELECT * FROM products", null, (err, result) => {
-//     if (err) return err;
-//     res.status(200).send(result.rows);
-//   });
-// });
-
+function checkIsAuthenticated(req, res, next) {
+  // console.log("check authetnicated called", req.user);
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/nouser");
+}
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
